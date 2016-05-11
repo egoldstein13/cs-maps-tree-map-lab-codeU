@@ -10,7 +10,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
-
+import java.util.Stack;
 /**
  * Implementation of a Map using a binary search tree.
  * 
@@ -72,7 +72,17 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 		Comparable<? super K> k = (Comparable<? super K>) target;
 		
 		// the actual search
-        // TODO: Fill this in.
+        	Node searchNode=root;
+		while(searchNode!=null){
+			if(k.compareTo(searchNode.key)==0)
+				return searchNode;
+		
+			else if(k.compareTo(searchNode.key)<0)
+				searchNode=searchNode.left;
+			else
+				searchNode=searchNode.right;
+		}
+
         return null;
 	}
 
@@ -92,6 +102,18 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 
 	@Override
 	public boolean containsValue(Object target) {
+		Stack<Node> s = new Stack<Node>();
+		s.push(root);
+		while(!s.isEmpty()){
+			Node searchNode=s.pop();
+		if(searchNode==null)
+			continue;
+		if(equals(target,searchNode.value))
+			return true;
+		s.push(searchNode.left);
+		s.push(searchNode.right);
+		}
+		
 		return false;
 	}
 
@@ -118,7 +140,15 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 	public Set<K> keySet() {
 		Set<K> set = new LinkedHashSet<K>();
         // TODO: Fill this in.
+		keySetHelper(root,set);
 		return set;
+	}
+	public void keySetHelper(Node n,Set s){
+		if(n.left!=null)
+			keySetHelper(n.left,s);
+		s.add(n.key);
+		if(n.right!=null)
+			keySetHelper(n.right,s);
 	}
 
 	@Override
@@ -135,9 +165,46 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 	}
 
 	private V putHelper(Node node, K key, V value) {
-        // TODO: Fill this in.
-        return null;
+        	Node n=findNode(key);
+		if(n!=null){
+			V oldVal=n.value;
+			n.value=value;
+			return oldVal;
+		}
+		else{
+			n = new Node(key, value);
+			Node searchNode=node;
+			Comparable<? super K> k = (Comparable<? super K>) key;
+			while(searchNode!=null){
+				if(k.compareTo(searchNode.key)<0){
+					if(searchNode.left==null){
+						searchNode.left=n;
+						size++;
+						return null;
+					}
+					else
+						searchNode=searchNode.left;
+				}
+				else if(k.compareTo(searchNode.key)>0){
+					 if(searchNode.right==null){
+                                                searchNode.right=n;
+						size++;
+                                                return null;
+                                        }
+					else
+                                        searchNode=searchNode.right;
+			
+			
+       			
+				}
+				else{
+					searchNode.key=key;	
+					return null;
+				}
+		}
 	}
+			return null;	
+}
 
 	@Override
 	public void putAll(Map<? extends K, ? extends V> map) {
